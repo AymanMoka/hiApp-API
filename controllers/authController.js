@@ -8,9 +8,20 @@ module.exports = {
   async createUser(req, res) {
     const schema = Joi.object({
       username: Joi.string().required().min(3),
-      email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
-      password: Joi.string().required().min(6).max(30),
-      repeatPassword: Joi.ref("password"),
+      email: Joi.string()
+        .required()
+        .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+        .messages({
+          "string.email": "email must be a valid email",
+        }),
+      password: Joi.string().required().min(6).max(30).messages({
+        "string.min": "password can't be less than 6 char ",
+        "string.max": "password must be less than or equal to 30 char",
+      }),
+      repeatPassword: Joi.string()
+        .required()
+        .valid(Joi.ref("password"))
+        .messages({ "any.only": "Password must matching" }),
     }); //joi object schema
 
     const { value, error } = schema.validate(req.body); //validate schema with req body
@@ -63,6 +74,41 @@ module.exports = {
             .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
             .json({ message: err.message });
         });
+    });
+  },
+
+  loginUser(req, res) {
+    if (!req.body.username || !req.body.password) {
+      return res
+        .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: "Username and password is a must !!" });
+    }
+
+    User.findOne({username:Helper.capitalize(req.body.username)}).then((user) => {
+      if (!user) {
+        return res
+          .status(Http.StatusCodes.NOT_FOUND)
+          .json({ message: "Username not found" });
+      }
+      return Bcrypt.compare(req.body.password,user.password).then((result) => {
+        if (!result) {
+          return res
+            .status(Http.StatusCodes.NOT_ACCEPTABLE)
+            .json({ message: "Password not correct !!" });
+        }
+        const token = Jwt.sign({ user: user }, process.env.secret_for_token, { expiresIn: '1d' });
+         return res
+           .status(Http.StatusCodes.OK)
+           .json({ message: "logged in", token: token });
+      }).catch((err) => {
+         return res
+           .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
+           .json({err:err.message});
+      });
+    }).catch((err) => {
+       return res
+         .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
+         .json({ err: err.message });
     });
   },
 };

@@ -65,6 +65,7 @@ module.exports = {
           const token = Jwt.sign({ user: user }, process.env.secret_for_token, {
             expiresIn: "1d",
           });
+          res.cookie("token", token);
           return res
             .status(Http.StatusCodes.CREATED)
             .json({ message: "user created", user: user, token: token });
@@ -84,31 +85,40 @@ module.exports = {
         .json({ message: "Username and password is a must !!" });
     }
 
-    User.findOne({username:Helper.capitalize(req.body.username)}).then((user) => {
-      if (!user) {
-        return res
-          .status(Http.StatusCodes.NOT_FOUND)
-          .json({ message: "Username not found" });
-      }
-      return Bcrypt.compare(req.body.password,user.password).then((result) => {
-        if (!result) {
+    User.findOne({ username: Helper.capitalize(req.body.username) })
+      .then((user) => {
+        if (!user) {
           return res
-            .status(Http.StatusCodes.NOT_ACCEPTABLE)
-            .json({ message: "Password not correct !!" });
+            .status(Http.StatusCodes.NOT_FOUND)
+            .json({ message: "Username not found" });
         }
-        const token = Jwt.sign({ user: user }, process.env.secret_for_token, { expiresIn: '1d' });
-         return res
-           .status(Http.StatusCodes.OK)
-           .json({ message: "logged in", token: token });
-      }).catch((err) => {
-         return res
-           .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
-           .json({err:err.message});
+        return Bcrypt.compare(req.body.password, user.password)
+          .then((result) => {
+            if (!result) {
+              return res
+                .status(Http.StatusCodes.NOT_ACCEPTABLE)
+                .json({ message: "Password not correct !!" });
+            }
+            const token = Jwt.sign(
+              { user: user },
+              process.env.secret_for_token,
+              { expiresIn: "1d" }
+            );
+             res.cookie("token", token);
+            return res
+              .status(Http.StatusCodes.OK)
+              .json({ message: "logged in", token: token });
+          })
+          .catch((err) => {
+            return res
+              .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
+              .json({ err: err.message });
+          });
+      })
+      .catch((err) => {
+        return res
+          .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
+          .json({ err: err.message });
       });
-    }).catch((err) => {
-       return res
-         .status(Http.StatusCodes.INTERNAL_SERVER_ERROR)
-         .json({ err: err.message });
-    });
   },
 };

@@ -4,8 +4,24 @@ const cors = require("cors");
 const cookie = require('cookie-parser');
 require("dotenv").config();
 
-
 const app = express();
+//socket.io
+const httpServer = require("http").createServer(app);
+const { Server } = require("socket.io");
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+});
+
+const stream = require("./socket/streams");
+stream(io);
+//end socket.io
+
+
 app.use(express.json({}));
 app.use(express.urlencoded({}));//parsing
 
@@ -34,7 +50,10 @@ app.use("/api/v1", authRoute);//auth middleware
 const postRoute = require("./routes/postRoute");
 app.use("/api/v1", postRoute);//post middleware
 
-app.listen(3000, () => {
+
+
+
+httpServer.listen(3000, () => {
   console.log("Server Started");
 });
 //connect to server

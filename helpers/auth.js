@@ -26,7 +26,7 @@ module.exports = {
                       .json({ msg: "Token is not valid", token: null });
                 }
                 req.user = decoded.user;
-                console.log(req.user);
+                // console.log(req.user);
                 return next();
           }
         );

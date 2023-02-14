@@ -12,7 +12,7 @@ const postSchema = new mongoose.Schema({
         required: true,
       },
       comment: { type: String, required: true },
-      usernmae: { type: String, default: "" },
+      username: { type: String, default: "" },
       createdAt: { type: Date, default: Date.now() },
     },
   ],

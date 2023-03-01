@@ -9,6 +9,16 @@ const userSchema = new mongoose.Schema({
       postId: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
     },
   ],
+  followers: [
+    {
+      followerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    }
+  ],
+  following: [
+    {
+      followingId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    }
+  ]
 });
 
 module.exports = mongoose.model("User", userSchema);

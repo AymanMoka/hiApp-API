@@ -50,6 +50,9 @@ app.use("/api/v1", authRoute);//auth middleware
 const postRoute = require("./routes/postRoute");
 app.use("/api/v1", postRoute);//post middleware
 
+const userRoute = require("./routes/userRoute");
+app.use("/api/v1", userRoute);//post middleware
+
 
 
 

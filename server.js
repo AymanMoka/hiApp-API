@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const cookie = require('cookie-parser');
+const cookie = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
@@ -21,15 +21,13 @@ const stream = require("./socket/streams");
 stream(io);
 //end socket.io
 
-
 app.use(express.json({}));
-app.use(express.urlencoded({}));//parsing
+app.use(express.urlencoded({})); //parsing
 
-app.use(cookie());//cookie parser
+app.use(cookie()); //cookie parser
 
 app.use(cors());
-app.options("*", cors());//enable cors
-
+app.options("*", cors()); //enable cors
 
 mongoose.connect(
   process.env.data_base,
@@ -44,17 +42,16 @@ mongoose.connect(
 // connect to db
 
 const authRoute = require("./routes/authRoute");
-app.use("/api/v1", authRoute);//auth middleware
-
+app.use("/api/v1", authRoute); //auth middleware
 
 const postRoute = require("./routes/postRoute");
-app.use("/api/v1", postRoute);//post middleware
+app.use("/api/v1", postRoute); //post middleware
+
+const friendsRoute = require("./routes/friendsRoute");
+app.use("/api/v1", friendsRoute); //friends middleware
 
 const userRoute = require("./routes/userRoute");
-app.use("/api/v1", userRoute);//post middleware
-
-
-
+app.use("/api/v1", userRoute); //post middleware
 
 httpServer.listen(3000, () => {
   console.log("Server Started");

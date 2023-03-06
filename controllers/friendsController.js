@@ -28,6 +28,10 @@ module.exports = {
                 followers: {
                   followerId: req.user._id, //the user who is logged in
                 },
+                notifications: {
+                  senderId: req.user._id,
+                  action: `${req.user.username} started following you`,
+                },
               },
             }
           );
